@@ -1,0 +1,103 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+model Organization {
+  id         String         @id @default(cuid())
+  name       String
+  inviteCode String         @unique
+  createdAt  DateTime       @default(now())
+  users      User[]
+  categories Category[]
+  questions  Question[]
+  templates  ExamTemplate[]
+  sessions   ExamSession[]
+
+  @@index([inviteCode])
+}
+
+model User {
+  id             String        @id // Firebase UID
+  email          String        @unique
+  displayName    String?
+  photoURL       String?
+  role           String        @default("user") // "super-admin" | "admin" | "user"
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  sessions       ExamSession[]
+
+  @@index([organizationId])
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  questions      Question[]
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+}
+
+model Question {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  categoryId     String
+  category       Category     @relation(fields: [categoryId], references: [id])
+  type           String // "single" | "multi" | "essay"
+  level          String // "easy" | "medium" | "hard" | "advanced"
+  text           String       @db.Text
+  options        Json? // Array of strings (options)
+  correctAnswers Json? // Array of indices (e.g., [0, 2] for multi-choice)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([categoryId])
+}
+
+model ExamTemplate {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  title          String
+  duration       Int // in minutes
+  isActive       Boolean      @default(false)
+  rules          Json // Array of { categoryId, type, level, count }
+  createdAt      DateTime     @default(now())
+  sessions       ExamSession[]
+
+  @@index([organizationId])
+  @@index([isActive])
+}
+
+model ExamSession {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  templateId     String
+  template       ExamTemplate @relation(fields: [templateId], references: [id])
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  startedAt      DateTime     @default(now())
+  submittedAt    DateTime?
+  status         String       @default("ongoing") // "ongoing" | "pending_review" | "graded"
+  questions      Json // Captured questions list (static snapshot)
+  userAnswers    Json // Mapping of questionId -> answers (Json)
+  score          Float?
+  cheatAttempts  Int          @default(0)
+  cheatLogs      Json? // Array of strings/log events
+  gradedAt       DateTime?
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([templateId])
+  @@index([status])
+}
