@@ -31,16 +31,25 @@ export async function GET(request: NextRequest) {
       },
       include: {
         template: {
-          select: { title: true, duration: true },
+          select: { title: true, duration: true, rules: true },
         },
       },
       orderBy: { startedAt: "desc" },
+    });
+
+    // 3. Fetch categories of the organization
+    const categories = await prisma.category.findMany({
+      where: {
+        organizationId: orgId,
+      },
+      orderBy: { name: "asc" },
     });
 
     return NextResponse.json({
       success: true,
       templates,
       sessions,
+      categories,
     });
   } catch (error: any) {
     console.error("Dashboard Data GET Error:", error);
