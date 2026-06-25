@@ -50,16 +50,21 @@ export default function OrganizationDetailsPage({ params }: PageProps) {
   const loadOrgData = async () => {
     try {
       const res = await fetch(`/api/super-admin/organizations/${orgId}/users`);
-      const data = await res.json();
-      if (res.ok) {
-        setOrg(data.organization);
-        setUsers(data.users || []);
-      } else {
-        setError(data.error || "Không thể tải thông tin tổ chức.");
+
+      // 1. Kiểm tra nếu HTTP request bị lỗi (404, 500...)
+      if (!res.ok) {
+        // Bắn lỗi để nhảy xuống catch, hoặc set state lỗi ngay tại đây
+        throw new Error(`Không tìm thấy dữ liệu (Status: ${res.status})`);
       }
+
+      // 2. Tới được đây nghĩa là res.ok = true (Status 200-299), lúc này ép kiểu JSON mới an toàn
+      const data = await res.json();
+      setOrg(data.organization);
+      setUsers(data.users || []);
+
     } catch (e) {
-      console.error(e);
-      setError("Lỗi kết nối hệ thống.");
+      console.error("Chi tiết lỗi:", e);
+      setError("Lỗi kết nối hệ thống hoặc không tìm thấy dữ liệu.");
     } finally {
       setLoading(false);
     }
@@ -244,11 +249,10 @@ export default function OrganizationDetailsPage({ params }: PageProps) {
                             </td>
                             <td className="px-6 py-4">
                               <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase ${
-                                  member.role === "admin"
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase ${member.role === "admin"
                                     ? "bg-indigo-50 text-indigo-600 border border-indigo-100"
                                     : "bg-slate-100 text-slate-600 border border-slate-200"
-                                }`}
+                                  }`}
                               >
                                 <Shield className="w-3 h-3 shrink-0" />
                                 <span>{member.role === "admin" ? "Admin" : "User"}</span>
@@ -261,11 +265,10 @@ export default function OrganizationDetailsPage({ params }: PageProps) {
                               <button
                                 onClick={() => handleUpdateRole(member.id, member.role)}
                                 disabled={isChanging}
-                                className={`inline-flex items-center gap-1.5 font-extrabold text-[10px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-colors cursor-pointer border ${
-                                  member.role === "admin"
+                                className={`inline-flex items-center gap-1.5 font-extrabold text-[10px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-colors cursor-pointer border ${member.role === "admin"
                                     ? "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
                                     : "bg-indigo-600 hover:bg-indigo-700 text-white border-transparent"
-                                } disabled:opacity-50`}
+                                  } disabled:opacity-50`}
                               >
                                 {isChanging ? (
                                   <Loader2 className="w-3 h-3 animate-spin" />
