@@ -126,7 +126,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <FileText className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-slate-800 tracking-tight text-base">
-              SuperExam SaaS
+              Super Exam
             </span>
           </div>
         </div>
@@ -142,10 +142,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 href={item.href}
                 className={`
                   flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                  ${
-                    isActive
-                      ? "bg-primary-50 text-primary-700 shadow-sm shadow-primary-100"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ${isActive
+                    ? "bg-primary-50 text-primary-700 shadow-sm shadow-primary-100"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }
                 `}
               >

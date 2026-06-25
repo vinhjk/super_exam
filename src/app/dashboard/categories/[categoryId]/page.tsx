@@ -91,6 +91,13 @@ export default function CategoryDetailPage({ params }: PageProps) {
     (s) => getExamCategory(s.template.rules) === categoryId
   );
 
+  // Compute statistics scoped to this category
+  const gradedSessions = filteredSessions.filter((s) => s.status === "graded" && s.score !== null);
+  const averageScore =
+    gradedSessions.length > 0
+      ? Math.round((gradedSessions.reduce((acc, s) => acc + (s.score || 0), 0) / gradedSessions.length) * 100) / 100
+      : 0;
+
   // Get current category name
   const currentCategoryName =
     categoryId === "mixed"
@@ -154,6 +161,29 @@ export default function CategoryDetailPage({ params }: PageProps) {
             </p>
           </div>
         </div>
+
+        {/* Stats Grid */}
+        <section className="grid grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center shrink-0">
+              <BookOpen className="w-5 h-5 text-primary-600" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Đã thi</p>
+              <p className="text-lg font-black text-slate-800 mt-0.5">{filteredSessions.length}</p>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+              <Trophy className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Điểm TB</p>
+              <p className="text-lg font-black text-slate-800 mt-0.5">{averageScore} /10</p>
+            </div>
+          </div>
+        </section>
 
         {error && (
           <div className="flex items-start gap-3 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-semibold">

@@ -35,7 +35,7 @@ export default function LoginPage() {
             <Award className="w-9 h-9 text-white" />
           </div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">
-            SuperExam SaaS
+            Super Exam
           </h1>
           <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mt-1.5">
             Hệ thống Quản lý thi trắc nghiệm & tự luận
